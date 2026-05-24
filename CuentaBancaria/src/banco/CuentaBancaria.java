@@ -3,54 +3,60 @@ package banco;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Cuenta bancaria simple con operaciones de ingreso, retirada y consulta de
- * saldo. Proyecto: cuenta-bancaria Versión: 1.0
- */
 public class CuentaBancaria {
-	private String titular;
-	private double saldo;
-	private List<String> movimientos;
+    private String titular;
+    private double saldo;
+    private List<String> movimientos;
 
-	public CuentaBancaria(String titular, double saldoInicial) {
-		this.titular = titular;
-		this.saldo = saldoInicial;
-		this.movimientos = new ArrayList<>();
-		movimientos.add("Apertura: +" + saldoInicial + " €");
-	}
+    public CuentaBancaria(String titular, double saldoInicial) {
+        // FIX IR-004: Validar saldo inicial
+        if (saldoInicial < 0) {
+            throw new IllegalArgumentException("El saldo inicial no puede ser negativo");
+        }
+        this.titular = titular;
+        this.saldo = saldoInicial;
+        this.movimientos = new ArrayList<>();
+        this.movimientos.add("Apertura: +" + saldoInicial + " €");
+    }
 
-	public void ingresar(double cantidad) {
- if (cantidad <= 0) {
-	 throw new IllegalArgumentException("La cantidad debe ser positiva");
- }
- saldo += cantidad;
- movimientos.add("Ingreso: +" + cantidad + " €");
- }
+    public void ingresar(double cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser positiva");
+        }
+        this.saldo += cantidad;
+        this.movimientos.add("Ingreso: +" + cantidad + " €");
+    }
 
-	// ¿Se puede retirar más de lo que hay?
-	public void retirar(double cantidad) {
- if (cantidad <= 0) {
-	 throw new IllegalArgumentException("La cantidad debe ser positiva");
- }
- saldo -= cantidad; // ← sin comprobación de saldo suficiente
- movimientos.add("Retirada: -" + cantidad + " €");
- }
+    public void retirar(double cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser positiva");
+        }
+        // FIX IR-001 e IR-003: Comprobar que hay saldo suficiente
+        if (cantidad > this.saldo) {
+            throw new IllegalArgumentException("Saldo insuficiente");
+        }
+        this.saldo -= cantidad; 
+        this.movimientos.add("Retirada: -" + cantidad + " €");
+    }
 
-	public double getSaldo() {
-		return saldo;
-	}
+    public double getSaldo() {
+        return this.saldo;
+    }
 
-	public String getTitular() {
-		return titular;
-	}
+    public String getTitular() {
+        return this.titular;
+    }
 
-	public List<String> getMovimientos() {
-		return movimientos;
-	}
+    public List<String> getMovimientos() {
+        return this.movimientos;
+    }
 
-	// Transfiere saldo a otra cuenta
-	public void transferir(CuentaBancaria destino, double cantidad) {
-		this.retirar(cantidad);
-		destino.ingresar(cantidad);
-	}
+    public void transferir(CuentaBancaria destino, double cantidad) {
+        // FIX IR-002: Comprobar que el destino no es nulo
+        if (destino == null) {
+            throw new IllegalArgumentException("La cuenta destino no puede ser nula");
+        }
+        this.retirar(cantidad);
+        destino.ingresar(cantidad);
+    }
 }
